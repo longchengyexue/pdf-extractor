@@ -1,4 +1,4 @@
-name: Build macOS Executable
+name: Build Windows & macOS
 
 on:
   push:
@@ -6,26 +6,33 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-mac:
-    runs-on: macos-latest
+  build:
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest]
+
+    runs-on: ${{ matrix.os }}
+
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: |
-          pip install pyinstaller PyPDF2
+        run: pip install pyinstaller PyPDF2
 
-      - name: Build executable
-        run: |
-          pyinstaller --onefile --name "PDF页面提取工具" export_pdf_2.py
+      - name: Build (Windows)
+        if: runner.os == 'Windows'
+        run: pyinstaller --onefile --name "PDF页面提取工具-Windows" export_pdf_2.py
+
+      - name: Build (macOS)
+        if: runner.os == 'macOS'
+        run: pyinstaller --onefile --name "PDF页面提取工具-macOS" export_pdf_2.py
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: PDF提取工具-macOS
+          name: PDF提取工具-${{ runner.os }}
           path: dist/
