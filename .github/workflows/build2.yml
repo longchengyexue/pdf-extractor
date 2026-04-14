@@ -1,4 +1,4 @@
-name: Build Windows & macOS
+name: Build Windows & macOS2
 
 on:
   workflow_dispatch:
